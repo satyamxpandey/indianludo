@@ -2,42 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AAKRAMAN - Strategy Battle</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfect Ludo JS</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="game-container">
-        <div class="half enemy-side">
-            <div class="fortress enemy-fort">DRUG (Enemy)</div>
+    <div class="game-container">
+        <div id="status">Red's Turn</div>
+        <div class="board" id="ludo-board">
+            <div class="house red"></div>
+            <div class="house green"></div>
+            <div class="house yellow"></div>
+            <div class="house blue"></div>
+            <div class="home-center"></div>
         </div>
-
-        <div id="battlefield" class="half player-side">
-            <div class="fortress player-fort">DRUG (Home)</div>
-        </div>
-
-        <div id="ui-layer">
-            <div id="mana-container">
-                <div id="mana-bar"></div>
-                <span id="mana-text">Mana: 0</span>
-            </div>
-
-            <div id="hand">
-                <div class="card" data-unit="soldier" data-cost="3">
-                    <p>Soldier</p>
-                    <span>Cost: 3</span>
-                </div>
-                <div class="card" data-unit="elephant" data-cost="7">
-                    <p>Elephant</p>
-                    <span>Cost: 7</span>
-                </div>
-                <div class="card" data-unit="archer" data-cost="4">
-                    <p>Archer</p>
-                    <span>Cost: 4</span>
-                </div>
-            </div>
+        <div class="controls">
+            <button id="dice-btn" onclick="rollDice()">Roll Dice</button>
+            <span id="dice-value">0</span>
         </div>
     </div>
-    <script src="game.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
