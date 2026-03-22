@@ -1,72 +1,29 @@
-const battlefield = document.getElementById('battlefield');
-const manaBar = document.getElementById('mana-bar');
-const manaText = document.getElementById('mana-text');
-const cards = document.querySelectorAll('.card');
+const players = ['red', 'green', 'yellow', 'blue'];
+let currentTurn = 0;
+let diceValue = 0;
+let canRoll = true;
 
-let mana = 0;
-const maxMana = 10;
-let selectedCard = null;
-
-// 1. Mana Regeneration (Increases every second)
-setInterval(() => {
-    if (mana < maxMana) {
-        mana += 0.5;
-        updateManaUI();
-    }
-}, 500);
-
-function updateManaUI() {
-    const percentage = (mana / maxMana) * 100;
-    manaBar.style.width = percentage + '%';
-    manaText.innerText = `Amrit: ${Math.floor(mana)}`;
-}
-
-// 2. Card Selection
-cards.forEach(card => {
-    card.addEventListener('click', (e) => {
-        // Deselect others
-        cards.forEach(c => c.classList.remove('selected'));
-        
-        // Select this one
-        selectedCard = {
-            type: card.dataset.unit,
-            cost: parseInt(card.dataset.cost)
-        };
-        card.classList.add('selected');
-        e.stopPropagation();
-    });
-});
-
-// 3. Spawning Units
-battlefield.addEventListener('click', (e) => {
-    if (!selectedCard) return;
-
-    if (mana >= selectedCard.cost) {
-        mana -= selectedCard.cost;
-        updateManaUI();
-        spawnUnit(selectedCard.type, e.clientX, e.clientY);
+function rollDice() {
+    if (!canRoll) return;
+    
+    diceValue = Math.floor(Math.random() * 6) + 1;
+    document.getElementById('dice-value').innerText = diceValue;
+    
+    // Simple Rule: If not a 6 and no pieces are out, skip turn (Logic stub)
+    if (diceValue !== 6) {
+        setTimeout(nextTurn, 1000);
     } else {
-        alert("Not enough Amrit!");
+        alert(players[currentTurn].toUpperCase() + " rolled a 6! You can move a piece out.");
+        canRoll = true; // In a full game, you'd wait for a piece click
     }
-});
-
-function spawnUnit(type, x, y) {
-    const unit = document.createElement('div');
-    unit.className = `unit ${type}`;
-    
-    // Position the unit where clicked
-    unit.style.left = (x - 15) + 'px';
-    unit.style.top = (y - 15) + 'px';
-    
-    document.body.appendChild(unit);
-
-    // Simple AI: Move toward the enemy side (top of screen)
-    setTimeout(() => {
-        unit.style.top = "-100px";
-    }, 100);
-
-    // Remove unit after it leaves the screen
-    setTimeout(() => {
-        unit.remove();
-    }, 5000);
 }
+
+function nextTurn() {
+    currentTurn = (currentTurn + 1) % 4;
+    document.getElementById('status').innerText = players[currentTurn].toUpperCase() + "'s Turn";
+    document.getElementById('status').style.color = players[currentTurn];
+    canRoll = true;
+}
+
+// Initialization
+document.getElementById('status').style.color = players[currentTurn];
