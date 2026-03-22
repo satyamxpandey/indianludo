@@ -1,35 +1,18 @@
-body{
-margin:0;
-overflow:hidden;
-font-family:Arial;
+body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #000; }
+#ui {
+    position: absolute; top: 20px; left: 20px; color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5); z-index: 10;
 }
-
-#ui{
-position:absolute;
-top:10px;
-left:10px;
-color:white;
-font-size:22px;
-z-index:10;
+#status { font-weight: bold; color: #ffeb3b; margin-top: 5px; }
+#banner {
+    position: absolute; top: 40%; width: 100%; text-align: center;
+    font-size: 80px; font-weight: bold; color: yellow;
+    display: none; z-index: 10; pointer-events: none;
 }
-
-#banner{
-position:absolute;
-top:40%;
-width:100%;
-text-align:center;
-font-size:70px;
-color:white;
-display:none;
-z-index:10;
+#hit-btn {
+    position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+    padding: 20px 50px; font-size: 24px; font-weight: bold;
+    background: #e91e63; color: white; border: none; border-radius: 50px;
+    cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
-
-#hit{
-position:absolute;
-bottom:30px;
-left:50%;
-transform:translateX(-50%);
-padding:15px 30px;
-font-size:20px;
-z-index:10;
-}
+#hit-btn:active { transform: translateX(-50%) scale(0.95); }
