@@ -1,18 +1,69 @@
-body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #000; }
+/* 1. Global Reset */
+body { 
+    margin: 0; 
+    overflow: hidden; 
+    font-family: 'Segoe UI', Arial, sans-serif; 
+    background: #000; 
+}
+
+/* 2. Score and Over Display (Top Left) */
 #ui {
-    position: absolute; top: 20px; left: 20px; color: white;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5); z-index: 10;
+    position: absolute; 
+    top: 20px; 
+    left: 20px; 
+    color: white;
+    font-size: 24px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8); 
+    z-index: 10;
 }
-#status { font-weight: bold; color: #ffeb3b; margin-top: 5px; }
+
+/* 3. Game Status (Ready / Incoming / Out) */
+#status { 
+    font-weight: bold; 
+    color: #ffeb3b; 
+    margin-top: 5px; 
+    font-size: 18px;
+}
+
+/* 4. Big Event Banner (FOUR / SIX / OUT) */
 #banner {
-    position: absolute; top: 40%; width: 100%; text-align: center;
-    font-size: 80px; font-weight: bold; color: yellow;
-    display: none; z-index: 10; pointer-events: none;
+    position: absolute; 
+    top: 40%; 
+    width: 100%; 
+    text-align: center;
+    font-size: 80px; 
+    font-weight: bold; 
+    color: #ffff00; /* Bright Yellow */
+    display: none; 
+    z-index: 10; 
+    pointer-events: none; /* Allows clicks to pass through if necessary */
+    text-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
+
+/* 5. The Hit Button (Bottom Center) */
 #hit-btn {
-    position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
-    padding: 20px 50px; font-size: 24px; font-weight: bold;
-    background: #e91e63; color: white; border: none; border-radius: 50px;
-    cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: absolute; 
+    bottom: 40px; 
+    left: 50%; 
+    transform: translateX(-50%);
+    padding: 18px 45px; 
+    font-size: 22px; 
+    font-weight: bold;
+    background: #e91e63; /* Cricket Pink/Red */
+    color: white; 
+    border: none; 
+    border-radius: 50px;
+    cursor: pointer; 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+    transition: background 0.2s, transform 0.1s;
+    z-index: 10;
 }
-#hit-btn:active { transform: translateX(-50%) scale(0.95); }
+
+/* Button Interaction */
+#hit-btn:hover {
+    background: #ff4081;
+}
+
+#hit-btn:active { 
+    transform: translateX(-50%) scale(0.92); 
+}
