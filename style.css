@@ -1,104 +1,29 @@
-body {
-    margin: 0;
-    background: #222;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    overflow: hidden;
-    color: white;
+:root {
+    --red: #ff3838; --blue: #17c0eb; --green: #32ff7e; --yellow: #fff200;
 }
 
-#game-container {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
+body { display: flex; justify-content: center; align-items: center; height: 100vh; background: #2f3542; color: white; font-family: sans-serif; }
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(15, 40px);
+    grid-template-rows: repeat(15, 40px);
+    gap: 1px;
+    background: #000;
+    border: 5px solid #000;
 }
 
-.half {
-    flex: 1;
-    position: relative;
-    border: 2px solid #444;
+.house { grid-row: span 6; grid-column: span 6; border: 2px solid #000; }
+.red { background: var(--red); grid-area: 1 / 1 / 7 / 7; }
+.green { background: var(--green); grid-area: 1 / 10 / 7 / 16; }
+.yellow { background: var(--yellow); grid-area: 10 / 10 / 16 / 16; }
+.blue { background: var(--blue); grid-area: 10 / 1 / 16 / 7; }
+
+.home-center {
+    grid-area: 7 / 7 / 10 / 10;
+    background: white;
+    background: conic-gradient(var(--red) 90deg, var(--green) 90deg 180deg, var(--yellow) 180deg 270deg, var(--blue) 270deg);
 }
 
-.enemy-side { background-color: #4d1a1a; }
-.player-side { background-color: #1a3d1a; }
-
-.fortress {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 10px 20px;
-    background: #666;
-    border-radius: 5px;
-    font-weight: bold;
-}
-
-.enemy-fort { top: 20px; border: 2px solid red; }
-.player-fort { bottom: 120px; border: 2px solid lime; }
-
-/* UI and Hand */
-#ui-layer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 110px;
-    background: rgba(0,0,0,0.8);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-#mana-container {
-    width: 90%;
-    height: 20px;
-    background: #333;
-    margin-top: 5px;
-    position: relative;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-#mana-bar {
-    height: 100%;
-    width: 0%;
-    background: #3498db;
-    transition: width 0.1s;
-}
-
-#mana-text {
-    position: absolute;
-    width: 100%;
-    text-align: center;
-    font-size: 12px;
-    top: 0;
-}
-
-#hand {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-}
-
-.card {
-    width: 80px;
-    height: 60px;
-    background: #e67e22;
-    border-radius: 5px;
-    text-align: center;
-    cursor: pointer;
-    font-size: 12px;
-    border: 2px solid transparent;
-}
-
-.card.selected { border-color: white; transform: scale(1.05); }
-
-/* Units */
-.unit {
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: lime;
-    transition: top 5s linear; /* Simple movement simulation */
-}
-.unit.elephant { width: 50px; height: 50px; background: #888; }
+.controls { margin-top: 20px; text-align: center; }
+#dice-btn { padding: 10px 20px; font-size: 1.2rem; cursor: pointer; border-radius: 8px; border: none; background: #70a1ff; }
