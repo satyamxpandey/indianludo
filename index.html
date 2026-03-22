@@ -3,314 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Aura Cricket | Pro Match</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { margin: 0; overflow: hidden; background: #020617; font-family: 'Inter', sans-serif; }
-        #canvas-container { position: relative; width: 100vw; height: 100vh; }
-        
-        /* Cinematic HUD */
-        .game-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 100; padding: 30px; }
-        .scoreboard { 
-            background: linear-gradient(180deg, rgba(30, 58, 138, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%);
-            border-bottom: 3px solid #3b82f6; color: white; padding: 15px 25px; border-radius: 8px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: fit-content;
-        }
-        
-        .power-container {
-            position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
-            width: 300px; height: 14px; background: rgba(255,255,255,0.1);
-            border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); overflow: hidden;
-        }
-        #power-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #3b82f6, #60a5fa, #ef4444); transition: width 0.1s; }
-
-        .timing-feedback {
-            position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 80px; font-weight: 900; color: #fff; text-shadow: 0 0 40px #3b82f6;
-            opacity: 0; transition: 0.2s; font-style: italic;
-        }
-        
-        #loading-screen {
-            position: fixed; inset: 0; background: #020617; z-index: 1000;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .loader { width: 48px; height: 48px; border: 5px solid #FFF; border-bottom-color: #3b82f6; border-radius: 50%; animation: rotation 1s linear infinite; }
-        @keyframes rotation { 0% { transform: rotate(0deg) } 100% { transform: rotate(360deg) } }
-    </style>
+    <title>AAKRAMAN - Strategy Battle</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<div id="loading-screen">
-    <div class="loader"></div>
-    <h1 class="text-white mt-6 tracking-[0.4em] font-bold text-sm">PREPARING STADIUM</h1>
-</div>
-
-<div id="canvas-container">
-    <div class="game-overlay">
-        <div class="scoreboard">
-            <p class="text-[10px] tracking-widest opacity-70">AURA PRO SERIES</p>
-            <h2 class="text-3xl font-black">RUNS: <span id="score-val">0</span></h2>
-            <p class="text-xs">WICKETS: <span id="wicket-val">0</span> | OVERS: <span id="over-val">0.0</span></p>
+    <div id="game-container">
+        <div class="half enemy-side">
+            <div class="fortress enemy-fort">DRUG (Enemy)</div>
         </div>
 
-        <div id="timing-msg" class="timing-feedback">PERFECT!</div>
+        <div id="battlefield" class="half player-side">
+            <div class="fortress player-fort">DRUG (Home)</div>
+        </div>
 
-        <div class="power-container">
-            <div id="power-bar"></div>
+        <div id="ui-layer">
+            <div id="mana-container">
+                <div id="mana-bar"></div>
+                <span id="mana-text">Mana: 0</span>
+            </div>
+
+            <div id="hand">
+                <div class="card" data-unit="soldier" data-cost="3">
+                    <p>Soldier</p>
+                    <span>Cost: 3</span>
+                </div>
+                <div class="card" data-unit="elephant" data-cost="7">
+                    <p>Elephant</p>
+                    <span>Cost: 7</span>
+                </div>
+                <div class="card" data-unit="archer" data-cost="4">
+                    <p>Archer</p>
+                    <span>Cost: 4</span>
+                </div>
+            </div>
         </div>
     </div>
-</div>
-
-<script>
-    let scene, camera, renderer, ball, batsman, bat, pitch;
-    let ballActive = false, isSwinging = false, powerValue = 0;
-    let runs = 0, wickets = 0, ballsBowled = 0;
-
-    function init() {
-        scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x020617);
-        scene.fog = new THREE.Fog(0x020617, 10, 80);
-
-        camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 3.8, 12); // Broadcaster view
-        camera.lookAt(0, 1.5, -5);
-
-        renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        document.getElementById('canvas-container').appendChild(renderer.domElement);
-
-        // --- Realistic Lighting ---
-        const amb = new THREE.AmbientLight(0xffffff, 0.4);
-        scene.add(amb);
-
-        const stadiumLight = new THREE.SpotLight(0xffffff, 1.5);
-        stadiumLight.position.set(20, 40, 20);
-        stadiumLight.castShadow = true;
-        stadiumLight.shadow.mapSize.width = 2048;
-        stadiumLight.shadow.mapSize.height = 2048;
-        scene.add(stadiumLight);
-
-        buildStadium();
-        buildHumanPlayer();
-        createBall();
-
-        document.getElementById('loading-screen').style.display = 'none';
-        animate();
-        setTimeout(startBowling, 2000);
-    }
-
-    function buildStadium() {
-        // Ground
-        const ground = new THREE.Mesh(
-            new THREE.CircleGeometry(100, 64),
-            new THREE.MeshStandardMaterial({ color: 0x064e3b, roughness: 0.9 })
-        );
-        ground.rotation.x = -Math.PI / 2;
-        ground.receiveShadow = true;
-        scene.add(ground);
-
-        // Professional Pitch
-        const pitchMesh = new THREE.Mesh(
-            new THREE.PlaneGeometry(3.2, 22),
-            new THREE.MeshStandardMaterial({ color: 0xe9d5ff, roughness: 1 })
-        );
-        pitchMesh.rotation.x = -Math.PI / 2;
-        pitchMesh.position.y = 0.02;
-        scene.add(pitchMesh);
-
-        // Boundary
-        const boundary = new THREE.Mesh(
-            new THREE.TorusGeometry(60, 0.4, 16, 100),
-            new THREE.MeshStandardMaterial({ color: 0xffffff })
-        );
-        boundary.rotation.x = Math.PI / 2;
-        scene.add(boundary);
-    }
-
-    function buildHumanPlayer() {
-        batsman = new THREE.Group();
-        const blueJersey = new THREE.MeshStandardMaterial({ color: 0x1d4ed8 });
-        const skin = new THREE.MeshStandardMaterial({ color: 0xffdbac });
-        
-        // Torso & Legs (Anatomical proportions)
-        const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.25, 1, 8), blueJersey);
-        torso.position.y = 1.4;
-        batsman.add(torso);
-
-        const lLeg = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.9, 0.2), blueJersey);
-        lLeg.position.set(-0.15, 0.45, 0);
-        batsman.add(lLeg);
-
-        const rLeg = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.9, 0.2), blueJersey);
-        rLeg.position.set(0.15, 0.45, 0);
-        batsman.add(rLeg);
-
-        // Helmet & Face
-        const head = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 16), skin);
-        head.position.y = 2.1;
-        batsman.add(head);
-
-        const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.25, 16, 16), new THREE.MeshStandardMaterial({color: 0x1e3a8a}));
-        helmet.position.y = 2.15;
-        batsman.add(helmet);
-
-        // Bat (High detail)
-        bat = new THREE.Group();
-        const blade = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.9, 0.1), new THREE.MeshStandardMaterial({color: 0xc4a484}));
-        bat.add(blade);
-        const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.5), new THREE.MeshStandardMaterial({color: 0x111111}));
-        handle.position.y = 0.7;
-        bat.add(handle);
-
-        bat.position.set(0.6, 1.2, 0.5);
-        bat.rotation.x = -0.6;
-        batsman.add(bat);
-
-        batsman.position.set(0.6, 0, 1.5);
-        scene.add(batsman);
-    }
-
-    function createBall() {
-        ball = new THREE.Mesh(
-            new THREE.SphereGeometry(0.065, 32, 32),
-            new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.2 })
-        );
-        ball.position.set(0, 0.8, -20);
-        ball.castShadow = true;
-        scene.add(ball);
-    }
-
-    function startBowling() {
-        ball.position.set((Math.random() - 0.5) * 0.8, 1, -20);
-        ballActive = true;
-        powerValue = 0;
-        document.getElementById('power-bar').style.width = '0%';
-    }
-
-    function triggerShot(dir) {
-        if(isSwinging) return;
-        isSwinging = true;
-
-        let startTime = Date.now();
-        const swingDuration = 300;
-
-        const animateSwing = () => {
-            let elapsed = Date.now() - startTime;
-            let p = elapsed / swingDuration;
-
-            if (p < 1) {
-                bat.rotation.y = Math.sin(p * Math.PI) * 3;
-                bat.position.x = 0.6 - (p * 1.5);
-                
-                // Collision Detection Logic
-                const distance = ball.position.distanceTo(batsman.position);
-                if (distance < 1.8 && ballActive) {
-                    processHit(dir);
-                }
-                requestAnimationFrame(animateSwing);
-            } else {
-                bat.rotation.y = 0;
-                bat.position.x = 0.6;
-                isSwinging = false;
-            }
-        };
-        animateSwing();
-    }
-
-    function processHit(dir) {
-        ballActive = false;
-        const timingZ = Math.abs(ball.position.z - 1.5);
-        const feedback = document.getElementById('timing-msg');
-        
-        let multiplier = 1;
-        if (timingZ < 0.2) { 
-            feedback.innerText = "PERFECT!"; multiplier = 2; 
-        } else if (timingZ < 0.5) { 
-            feedback.innerText = "GOOD"; multiplier = 1.2; 
-        } else { 
-            feedback.innerText = "LATE"; multiplier = 0.6; 
-        }
-
-        feedback.style.opacity = 1;
-        setTimeout(() => feedback.style.opacity = 0, 1000);
-
-        const force = (multiplier * 0.6) + (powerValue / 100);
-        launchBall(dir, force);
-    }
-
-    function launchBall(dir, force) {
-        let vx = (Math.random() - 0.5) * force;
-        let vy = dir === 'up' ? force * 0.5 : 0.1;
-        let vz = -force;
-
-        const ballLoop = () => {
-            ball.position.x += vx;
-            ball.position.y += vy;
-            ball.position.z += vz;
-            vy -= 0.012; // Gravity
-
-            if (ball.position.y < 0.065) {
-                ball.position.y = 0.065;
-                vy *= -0.3; // Bounce loss
-            }
-
-            const totalDist = Math.sqrt(ball.position.x**2 + ball.position.z**2);
-            if (totalDist < 65 && Math.abs(vz) > 0.05) {
-                requestAnimationFrame(ballLoop);
-            } else {
-                finishOver(totalDist, ball.position.y > 1.5);
-            }
-        };
-        ballLoop();
-    }
-
-    function finishOver(d, airborne) {
-        let scored = 0;
-        if (d >= 60) scored = airborne ? 6 : 4;
-        else if (d > 30) scored = 2;
-        else scored = 1;
-
-        runs += scored;
-        ballsBowled++;
-        document.getElementById('score-val').innerText = runs;
-        document.getElementById('over-val').innerText = Math.floor(ballsBowled/6) + "." + (ballsBowled%6);
-        setTimeout(startBowling, 2000);
-    }
-
-    // --- Controls ---
-    window.addEventListener('keydown', (e) => {
-        if(e.code === 'ArrowUp') triggerShot('up');
-        if(e.code === 'ArrowLeft' || e.code === 'ArrowRight') triggerShot('drive');
-        if(e.code === 'Space') {
-            powerValue = Math.min(powerValue + 8, 100);
-            document.getElementById('power-bar').style.width = powerValue + '%';
-        }
-    });
-
-    function animate() {
-        requestAnimationFrame(animate);
-        if (ballActive) {
-            ball.position.z += 0.4;
-            // Simulated bowling bounce
-            if (ball.position.z > -10 && ball.position.z < -8) ball.position.y -= 0.03;
-            if (ball.position.z >= -8) ball.position.y += 0.02;
-
-            if (ball.position.z > 5) {
-                ballActive = false;
-                wickets++;
-                document.getElementById('wicket-val').innerText = wickets;
-                document.getElementById('timing-msg').innerText = "WICKET!";
-                document.getElementById('timing-msg').style.opacity = 1;
-                setTimeout(() => { document.getElementById('timing-msg').style.opacity = 0; startBowling(); }, 2000);
-            }
-        }
-        renderer.render(scene, camera);
-    }
-
-    init();
-</script>
+    <script src="game.js"></script>
 </body>
 </html>
