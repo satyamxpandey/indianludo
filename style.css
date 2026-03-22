@@ -1,69 +1,20 @@
-/* 1. Global Reset */
-body { 
-    margin: 0; 
-    overflow: hidden; 
-    font-family: 'Segoe UI', Arial, sans-serif; 
-    background: #000; 
-}
-
-/* 2. Score and Over Display (Top Left) */
+body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #1a1a1a; }
 #ui {
-    position: absolute; 
-    top: 20px; 
-    left: 20px; 
-    color: white;
-    font-size: 24px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.8); 
-    z-index: 10;
+    position: absolute; top: 20px; left: 20px; color: white;
+    font-size: 28px; font-weight: bold; text-shadow: 2px 2px 5px rgba(0,0,0,0.7); z-index: 10;
 }
-
-/* 3. Game Status (Ready / Incoming / Out) */
-#status { 
-    font-weight: bold; 
-    color: #ffeb3b; 
-    margin-top: 5px; 
-    font-size: 18px;
-}
-
-/* 4. Big Event Banner (FOUR / SIX / OUT) */
+#status { color: #00ffcc; font-size: 18px; margin-top: 10px; text-transform: uppercase; }
 #banner {
-    position: absolute; 
-    top: 40%; 
-    width: 100%; 
-    text-align: center;
-    font-size: 80px; 
-    font-weight: bold; 
-    color: #ffff00; /* Bright Yellow */
-    display: none; 
-    z-index: 10; 
-    pointer-events: none; /* Allows clicks to pass through if necessary */
-    text-shadow: 0 0 20px rgba(0,0,0,0.5);
+    position: absolute; top: 35%; width: 100%; text-align: center;
+    font-size: 100px; font-weight: 900; color: #ffeb3b;
+    display: none; z-index: 10; pointer-events: none;
+    text-shadow: 0 0 20px rgba(0,0,0,0.8);
 }
-
-/* 5. The Hit Button (Bottom Center) */
 #hit-btn {
-    position: absolute; 
-    bottom: 40px; 
-    left: 50%; 
-    transform: translateX(-50%);
-    padding: 18px 45px; 
-    font-size: 22px; 
-    font-weight: bold;
-    background: #e91e63; /* Cricket Pink/Red */
-    color: white; 
-    border: none; 
-    border-radius: 50px;
-    cursor: pointer; 
-    box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-    transition: background 0.2s, transform 0.1s;
-    z-index: 10;
+    position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+    padding: 20px 60px; font-size: 26px; font-weight: bold;
+    background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white;
+    border: none; border-radius: 50px; cursor: pointer;
+    box-shadow: 0 10px 20px rgba(255, 75, 43, 0.4); transition: 0.2s;
 }
-
-/* Button Interaction */
-#hit-btn:hover {
-    background: #ff4081;
-}
-
-#hit-btn:active { 
-    transform: translateX(-50%) scale(0.92); 
-}
+#hit-btn:active { transform: translateX(-50%) scale(0.9); }
