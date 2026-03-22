@@ -2,20 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Ludo Master</title>
+  <title>Almost Win Game</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>Ludo Master</h1>
+<h1>⚡ Almost Win ⚡</h1>
 
-<canvas id="board" width="600" height="600"></canvas>
-
-<div class="controls">
-  <button onclick="rollDice()">🎲 Roll Dice</button>
-  <p id="turn">Player Turn: RED</p>
-  <p id="dice">Dice: -</p>
+<div class="game-box">
+  <div id="bar-container">
+    <div id="perfect-zone"></div>
+    <div id="moving-bar"></div>
+  </div>
 </div>
+
+<button onclick="stopBar()">TAP</button>
+
+<h2 id="result">Tap to Start</h2>
+<p id="score">Score: 0</p>
+<p id="streak">Streak: 0</p>
 
 <script src="game.js"></script>
 </body>
