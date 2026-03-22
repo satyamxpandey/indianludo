@@ -1,136 +1,169 @@
-let scene = new THREE.Scene()
-scene.background = new THREE.Color(0x87ceeb)
+// --- Scene Setup ---
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87ceeb);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
 
-let camera = new THREE.PerspectiveCamera(
-60,
-window.innerWidth/window.innerHeight,
-0.1,
-1000
-)
+// Lights
+const light = new THREE.DirectionalLight(0xffffff, 1.2);
+light.position.set(5, 10, 7.5);
+scene.add(light);
+scene.add(new THREE.AmbientLight(0x404040));
 
-let renderer = new THREE.WebGLRenderer({antialias:true})
-renderer.setSize(window.innerWidth,window.innerHeight)
-document.body.appendChild(renderer.domElement)
+// --- Game Objects ---
+// Grass
+const ground = new THREE.Mesh(
+    new THREE.CircleGeometry(100, 64),
+    new THREE.MeshPhongMaterial({ color: 0x2e8b57 })
+);
+ground.rotation.x = -Math.PI / 2;
+scene.add(ground);
 
-let light = new THREE.DirectionalLight(0xffffff,1)
-light.position.set(10,20,10)
-scene.add(light)
+// Pitch
+const pitch = new THREE.Mesh(
+    new THREE.BoxGeometry(4, 0.1, 30),
+    new THREE.MeshPhongMaterial({ color: 0xdbb07d })
+);
+pitch.position.y = 0.01;
+scene.add(pitch);
 
-scene.add(new THREE.AmbientLight(0x404040))
+// Batsman (Blue)
+const batsman = new THREE.Mesh(new THREE.BoxGeometry(1, 3, 1), new THREE.MeshPhongMaterial({ color: 0x0000ff }));
+batsman.position.set(0, 1.5, 12);
+scene.add(batsman);
 
-// stadium ground
-let ground = new THREE.Mesh(
-new THREE.CircleGeometry(60,64),
-new THREE.MeshPhongMaterial({color:0x2e8b57})
-)
-ground.rotation.x = -Math.PI/2
-scene.add(ground)
+// Bat (Pivot for rotation)
+const batGroup = new THREE.Group();
+batGroup.position.set(0.8, 1.5, 12);
+scene.add(batGroup);
+const bat = new THREE.Mesh(new THREE.BoxGeometry(0.3, 2.5, 0.6), new THREE.MeshPhongMaterial({ color: 0x8b4513 }));
+bat.position.y = 0.5; // Offset so it swings from top
+batGroup.add(bat);
 
-// pitch
-let pitch = new THREE.Mesh(
-new THREE.BoxGeometry(3,0.1,24),
-new THREE.MeshPhongMaterial({color:0xcaa472})
-)
-pitch.position.y=0.05
-scene.add(pitch)
-
-// batsman
-let batsman = new THREE.Mesh(
-new THREE.BoxGeometry(1,3,1),
-new THREE.MeshPhongMaterial({color:0x0000ff})
-)
-batsman.position.set(-2,1.5,0)
-scene.add(batsman)
-
-// bat
-let bat = new THREE.Mesh(
-new THREE.BoxGeometry(0.2,2,0.2),
-new THREE.MeshPhongMaterial({color:0x8b4513})
-)
-bat.position.set(-1.2,2,0)
-scene.add(bat)
-
-// bowler
-let bowler = new THREE.Mesh(
-new THREE.BoxGeometry(1,3,1),
-new THREE.MeshPhongMaterial({color:0xff0000})
-)
-bowler.position.set(6,1.5,0)
-scene.add(bowler)
-
-// ball
-let ball = new THREE.Mesh(
-new THREE.SphereGeometry(0.25,32,32),
-new THREE.MeshPhongMaterial({color:0xffffff})
-)
-ball.position.set(6,1,0)
-scene.add(ball)
-
-camera.position.set(8,5,10)
-camera.lookAt(0,1,0)
-
-let speed = 0.12
-let score = 0
-let overBall = 0
-
-function animate(){
-requestAnimationFrame(animate)
-
-ball.position.x -= speed
-ball.position.y = 1 + Math.sin(Date.now()*0.005)*0.2
-
-if(ball.position.x < -2.3){
-resetBall()
+// Wickets
+const wicketGeo = new THREE.BoxGeometry(0.1, 2.5, 0.1);
+const wicketMat = new THREE.MeshPhongMaterial({color: 0xffffff});
+for(let i = -0.4; i <= 0.4; i += 0.4) {
+    let w = new THREE.Mesh(wicketGeo, wicketMat);
+    w.position.set(i, 1.25, 13);
+    scene.add(w);
 }
 
-renderer.render(scene,camera)
-}
-animate()
+// Ball
+const ball = new THREE.Mesh(new THREE.SphereGeometry(0.2, 32, 32), new THREE.MeshPhongMaterial({ color: 0xcc0000 }));
+scene.add(ball);
 
-function swing(){
-bat.rotation.z = -1
+// --- Game Variables ---
+let ballSpeedZ = 0;
+let ballSpeedX = 0;
+let ballSpeedY = 0;
+let isBallInPlay = false;
+let score = 0;
+let overBall = 0;
+let canHit = true;
 
-setTimeout(()=>{
-bat.rotation.z = 0
-},150)
+camera.position.set(0, 6, 20);
+camera.lookAt(0, 0, 0);
 
-if(ball.position.x < -1.5 && ball.position.x > -2.5){
-hit()
-}
-}
-
-function hit(){
-let runs=[1,2,3,4,6]
-let r=runs[Math.floor(Math.random()*runs.length)]
-
-score += r
-
-document.getElementById("score").innerHTML="Score: "+score
-
-if(r==4) show("FOUR")
-if(r==6) show("SIX")
-
-resetBall()
-}
-
-function resetBall(){
-ball.position.set(6,1,0)
-overBall++
-
-document.getElementById("over").innerHTML=
-"Over: "+Math.floor(overBall/6)+"."+(overBall%6)
+// --- Functions ---
+function deliverBall() {
+    if (isBallInPlay) return;
+    
+    ball.position.set(0, 4, -12); // Start at bowler end
+    ballSpeedZ = 0.35; // Speed toward batsman
+    ballSpeedY = -0.05; // Dropping down
+    ballSpeedX = (Math.random() - 0.5) * 0.05; // Slight random angle
+    isBallInPlay = true;
+    canHit = true;
+    document.getElementById("status").innerText = "Incoming!";
 }
 
-function show(t){
-let b=document.getElementById("banner")
-b.innerHTML=t
-b.style.display="block"
+function swing() {
+    if (!canHit) return;
+    
+    // Animation
+    batGroup.rotation.x = -Math.PI / 2;
+    setTimeout(() => { batGroup.rotation.x = 0; }, 200);
 
-setTimeout(()=>{
-b.style.display="none"
-},700)
+    // Hit Logic: Distance check
+    const dist = ball.position.distanceTo(batsman.position);
+    if (dist < 2.5 && isBallInPlay) {
+        hit();
+    }
 }
 
-document.getElementById("hit").onclick = swing
-document.addEventListener("click",swing)
-document.addEventListener("touchstart",swing)
+function hit() {
+    canHit = false;
+    let runs = [1, 2, 3, 4, 6];
+    let r = runs[Math.floor(Math.random() * runs.length)];
+    
+    // Send ball flying away
+    ballSpeedZ = -0.6; 
+    ballSpeedY = 0.2;
+    ballSpeedX = (Math.random() - 0.5) * 0.4;
+
+    score += r;
+    updateUI();
+    if (r >= 4) showBanner(r === 4 ? "FOUR!" : "SIXER!");
+    document.getElementById("status").innerText = "Great Shot!";
+}
+
+function resetPlay(message) {
+    isBallInPlay = false;
+    overBall++;
+    updateUI();
+    document.getElementById("status").innerText = message;
+    setTimeout(deliverBall, 1500);
+}
+
+function updateUI() {
+    document.getElementById("score").innerText = "Score: " + score;
+    document.getElementById("over").innerText = "Over: " + Math.floor(overBall / 6) + "." + (overBall % 6);
+}
+
+function showBanner(text) {
+    const b = document.getElementById("banner");
+    b.innerText = text;
+    b.style.display = "block";
+    setTimeout(() => { b.style.display = "none"; }, 1000);
+}
+
+// --- Main Loop ---
+function animate() {
+    requestAnimationFrame(animate);
+    
+    if (isBallInPlay) {
+        ball.position.z += ballSpeedZ;
+        ball.position.y += ballSpeedY;
+        ball.position.x += ballSpeedX;
+
+        // Bounce on pitch
+        if (ball.position.y < 0.2 && ball.position.z < 10) {
+            ballSpeedY = 0.1;
+        } else {
+            ballSpeedY -= 0.005; // Gravity
+        }
+
+        // Missed it?
+        if (ball.position.z > 15) {
+            resetPlay("Dot Ball");
+        }
+        
+        // Out of bounds (after hit)
+        if (ball.position.z < -20 || Math.abs(ball.position.x) > 30) {
+            resetPlay("Ready for next...");
+        }
+    }
+
+    renderer.render(scene, camera);
+}
+
+// Controls
+document.getElementById("hit-btn").onclick = (e) => { e.stopPropagation(); swing(); };
+window.addEventListener("keydown", (e) => { if(e.code === "Space") swing(); });
+
+// Start
+deliverBall();
+animate();
