@@ -1,87 +1,56 @@
-const canvas = document.getElementById("board");
-const ctx = canvas.getContext("2d");
-
-const TILE_SIZE = 40;
-
-const players = [
-  { color: "red", tokens: [0, 0, 0, 0] },
-  { color: "blue", tokens: [0, 0, 0, 0] }
-];
-
-let currentPlayer = 0;
-let diceValue = 0;
-
-// Simple linear path (demo)
-const path = [];
-for (let i = 0; i < 50; i++) {
-  path.push({
-    x: 50 + (i % 10) * TILE_SIZE,
-    y: 50 + Math.floor(i / 10) * TILE_SIZE
-  });
+body {
+  text-align: center;
+  background: #0f172a;
+  color: white;
+  font-family: Arial;
 }
 
-// 🎲 Roll Dice
-function rollDice() {
-  diceValue = Math.floor(Math.random() * 6) + 1;
-  document.getElementById("dice").innerText = "Dice: " + diceValue;
-
-  moveToken();
+h1 {
+  margin-top: 20px;
 }
 
-// 🧩 Move Token
-function moveToken() {
-  let player = players[currentPlayer];
-
-  for (let i = 0; i < player.tokens.length; i++) {
-    let pos = player.tokens[i];
-
-    if (pos === 0 && diceValue === 6) {
-      player.tokens[i] = 1;
-      break;
-    } else if (pos > 0) {
-      player.tokens[i] += diceValue;
-      break;
-    }
-  }
-
-  if (diceValue !== 6) {
-    currentPlayer = (currentPlayer + 1) % players.length;
-  }
-
-  updateTurn();
-  drawBoard();
+.game-box {
+  margin: 40px auto;
+  width: 400px;
 }
 
-// 🔄 Update Turn UI
-function updateTurn() {
-  document.getElementById("turn").innerText =
-    "Player Turn: " + players[currentPlayer].color.toUpperCase();
+#bar-container {
+  position: relative;
+  width: 100%;
+  height: 40px;
+  background: #1e293b;
+  border-radius: 20px;
+  overflow: hidden;
 }
 
-// 🎨 Draw Board
-function drawBoard() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Draw path
-  path.forEach(tile => {
-    ctx.strokeRect(tile.x, tile.y, TILE_SIZE, TILE_SIZE);
-  });
-
-  // Draw tokens
-  players.forEach(player => {
-    player.tokens.forEach(pos => {
-      if (pos > 0 && pos < path.length) {
-        let tile = path[pos];
-
-        ctx.beginPath();
-        ctx.arc(tile.x + 20, tile.y + 20, 10, 0, Math.PI * 2);
-        ctx.fillStyle = player.color;
-        ctx.fill();
-      }
-    });
-  });
+#moving-bar {
+  position: absolute;
+  width: 20px;
+  height: 100%;
+  background: #38bdf8;
+  left: 0;
+  transition: left 0.05s linear;
 }
 
-// Init
-drawBoard();
-updateTurn();
+#perfect-zone {
+  position: absolute;
+  width: 40px;
+  height: 100%;
+  background: #22c55e;
+  left: 70%;
+  border-radius: 20px;
+}
+
+button {
+  margin-top: 20px;
+  padding: 10px 30px;
+  font-size: 18px;
+  border: none;
+  background: #f59e0b;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #fbbf24;
+}
