@@ -1,26 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfect Ludo JS</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Ludo Master</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="game-container">
-        <div id="status">Red's Turn</div>
-        <div class="board" id="ludo-board">
-            <div class="house red"></div>
-            <div class="house green"></div>
-            <div class="house yellow"></div>
-            <div class="house blue"></div>
-            <div class="home-center"></div>
-        </div>
-        <div class="controls">
-            <button id="dice-btn" onclick="rollDice()">Roll Dice</button>
-            <span id="dice-value">0</span>
-        </div>
-    </div>
-    <script src="script.js"></script>
+
+<h1>Ludo Master</h1>
+
+<canvas id="board" width="600" height="600"></canvas>
+
+<div class="controls">
+  <button onclick="rollDice()">🎲 Roll Dice</button>
+  <p id="turn">Player Turn: RED</p>
+  <p id="dice">Dice: -</p>
+</div>
+
+<script src="game.js"></script>
 </body>
 </html>
